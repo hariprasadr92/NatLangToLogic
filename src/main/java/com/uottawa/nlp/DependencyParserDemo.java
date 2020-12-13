@@ -1,4 +1,4 @@
-package com.hari.nlp;
+package com.uottawa.nlp;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
@@ -17,7 +17,6 @@ import java.util.List;
  * Demonstrates how to first use the tagger, then use the NN dependency
  * parser. Note that the parser will not work on untagged text.
  *
- * @author Jon Gauthier
  */
 public class DependencyParserDemo  {
 
@@ -31,7 +30,7 @@ public class DependencyParserDemo  {
     String modelPath = DependencyParser.DEFAULT_MODEL;
     String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger";
 
-    String text = "I can almost always tell when movies use fake dinosaurs.";
+    String text = "Sue asked George to respond to her offer.";
 
     MaxentTagger tagger = new MaxentTagger(taggerPath);
     DependencyParser parser = DependencyParser.loadFromModelFile(modelPath);
@@ -47,7 +46,7 @@ public class DependencyParserDemo  {
       
       for (TypedDependency dep: dependencies) {
     	  
-    	  System.out.println(dep.toString()+" "+ dep.gov().index()+" "+dep.dep().word().toString());
+    	  System.out.println(dep.toString()+" "+ dep.gov().index()+" "+dep.dep().word().toString()+"---"+dep.reln().toString());
       }
       
     }

@@ -1,4 +1,4 @@
-package com.hari.nlp;
+package com.uottawa.nlp;
 
 import java.util.List;
 

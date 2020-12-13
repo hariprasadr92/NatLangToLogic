@@ -1,4 +1,4 @@
-package com.uo.nlp4se.assg2.model;
+package com.uottawa.nlp.model;
 
 import com.opencsv.bean.CsvBindByPosition;
 

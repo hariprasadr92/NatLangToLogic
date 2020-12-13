@@ -1,4 +1,4 @@
-package com.hari.nlp;
+package com.uottawa.nlp;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.CoreDocument;

@@ -1,4 +1,4 @@
-package com.hari.nlp;
+package com.uottawa.nlp;
 
 import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -10,7 +10,7 @@ public class Pipeline {
 
     private static StanfordCoreNLP stanfordCoreNLP;
     private static Properties properties;
-    private static String propertiesName = "tokenize,ssplit,pos,parse";
+    private static String propertiesName = "tokenize,ssplit,pos,lemma,parse";
     //"tokenize,ssplit,pos,lemma, ner,parse, sentiment";
 
     

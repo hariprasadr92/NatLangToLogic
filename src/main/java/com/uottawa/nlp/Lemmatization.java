@@ -1,4 +1,4 @@
-package com.hari.nlp;
+package com.uottawa.nlp;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -7,25 +7,23 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.util.List;
 
-public class NamedEntityRecognizer {
+public class Lemmatization {
 
     public static void main(String[] args) {
-        StanfordCoreNLP stanfordCoreNLP = Pipeline.getPipeline();
-        String text = "My name is Hari Prasad and I have a friend Robert who has ten friends.";
 
+        StanfordCoreNLP stanfordCoreNLP = Pipeline.getPipeline();
+        String text = "The Angular velocities of the satellite should always be lower than 1.5 m/s";
         CoreDocument coreDocument = new CoreDocument(text);
         stanfordCoreNLP.annotate(coreDocument);
 
         List<CoreLabel> coreLabelList = coreDocument.tokens();
 
-        for(CoreLabel coreLabel : coreLabelList) {
+        for (CoreLabel coreLabel : coreLabelList) {
 
-            String ner = coreLabel.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-            System.out.println(coreLabel.originalText() + "-" + ner);
+            System.out.println(coreLabel.originalText() + "-" + coreLabel.lemma());
 
         }
     }
-
 
 
 }

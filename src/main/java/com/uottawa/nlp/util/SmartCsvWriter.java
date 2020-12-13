@@ -1,18 +1,13 @@
-package util;
+package com.uottawa.nlp.util;
 
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import com.uo.nlp4se.assg2.model.Friend;
-import com.uo.nlp4se.assg2.model.PAAResult;;
+import com.uottawa.nlp.model.ExtractedResult;;
 
 public class SmartCsvWriter {
 	
@@ -21,13 +16,13 @@ public class SmartCsvWriter {
 		writeToFile(Collections.EMPTY_LIST);
 	} 
 	
-	public static void writeToFile(List<PAAResult> results)  {
+	public static void writeToFile(List<ExtractedResult> results)  {
 		
 		try {
-			Writer writer= new FileWriter("tgt.csv");
+			Writer writer= new FileWriter("output2.csv");
 			
-			StatefulBeanToCsv<PAAResult> beanToCSV = 
-					new StatefulBeanToCsvBuilder<PAAResult>(writer).build();
+			StatefulBeanToCsv<ExtractedResult> beanToCSV = 
+					new StatefulBeanToCsvBuilder<ExtractedResult>(writer).build();
 			
 //			List<Friend> friends = new ArrayList<Friend>();
 //			friends.add(new Friend(10,"hp","10-Aug"));

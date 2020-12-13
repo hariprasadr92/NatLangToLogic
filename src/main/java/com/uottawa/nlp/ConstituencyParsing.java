@@ -1,4 +1,4 @@
-package com.hari.nlp;
+package com.uottawa.nlp;
 
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.DependencyAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -39,7 +39,6 @@ public class ConstituencyParsing {
         annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(TreeCoreAnnotations.TreeAnnotation.class);
     System.out.println(tree.pennString());
     
-    System.out.println(annotation.get(CoreAnnotations.DependentsAnnotation.class));
     //Set<Dependency<Label, Label, Object>> taggedwords = tree.dependencies();
     
     
@@ -95,7 +94,7 @@ public class ConstituencyParsing {
   
   public static List<Tree> applyTregex(String tregexExpr, Tree tree ){
 	  
-	  	String regex = "NP !< NP";
+	  	String regex = tregexExpr;
 	    TregexPattern p = TregexPattern.compile(tregexExpr);
 	    TregexMatcher m = p.matcher(tree);
 	    List<Tree> matchedSubtrees = new ArrayList<Tree>();

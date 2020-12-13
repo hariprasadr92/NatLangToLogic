@@ -1,4 +1,4 @@
-package util;
+package com.uottawa.nlp.util;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,7 +10,6 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import com.uo.nlp4se.assg2.model.Friend;
 
 public class FileReaderWriter {
 	
