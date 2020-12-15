@@ -9,6 +9,8 @@ public class AppConstants {
 	 public static final List<String> VERB_POS_TAGS = Arrays.asList("VB","VBP","VBZ","VBG","VBD","VBN");
 	 public static final List<String> ADJECTIVE_POS_TAGS = Arrays.asList("JJ","JJR","JJS");
 	 public static final List<String> SUBJ_DEP_REL = Arrays.asList("nsubj","nsubj:pass");
+	 public static final List<String> COND_CLAUSE_DEP_REL = Arrays.asList("advcl","advcl:in","advcl:if");
+
 
 	 // Tregex patterns	 
 	 public static final String TREGEX_ATOMIC_NP = "NP !< NP";

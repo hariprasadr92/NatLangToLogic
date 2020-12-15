@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.uottawa.nlp.model.ExtractedResult;;
+import com.uottawa.nlp.model.ExtractedResult;
 
 public class SmartCsvWriter {
 	
@@ -19,7 +19,7 @@ public class SmartCsvWriter {
 	public static void writeToFile(List<ExtractedResult> results)  {
 		
 		try {
-			Writer writer= new FileWriter("output2.csv");
+			Writer writer= new FileWriter("output3.csv");
 			
 			StatefulBeanToCsv<ExtractedResult> beanToCSV = 
 					new StatefulBeanToCsvBuilder<ExtractedResult>(writer).build();
