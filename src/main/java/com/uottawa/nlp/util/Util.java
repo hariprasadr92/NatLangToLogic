@@ -24,16 +24,14 @@ public class Util {
 		comparators.put("lower", "<");
 		comparators.put("greater than", ">");
 		comparators.put("lesser", "<");
+		comparators.put("lesser than", "<");
 		comparators.put("greater", ">");
 		comparators.put("exceed", ">");
 		comparators.put("more", ">");
 		comparators.put("not", "!");
 
-
-
-		System.out.println(comparators);
-				
-		return null;		
+		String comparator = comparators.get(comparatorPhrase);					
+		return (isNullOrEmpty(comparator))?comparatorPhrase:comparator;		
 	}
 	
 }

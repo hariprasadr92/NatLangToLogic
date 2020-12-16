@@ -6,7 +6,10 @@ import java.util.List;
 import com.uottawa.nlp.model.ConditionClause;
 import com.uottawa.nlp.model.ExtractedResult;
 import com.uottawa.nlp.model.MainClause;
+import com.uottawa.nlp.model.Subject;
 import com.uottawa.nlp.util.AppConstants;
+import com.uottawa.nlp.util.Util;
+
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -43,7 +46,6 @@ public class ComponentExtractor {
         Tree ctree= ConstituencyParsing.getConstituencyParseTree(text);
 		List<TypedDependency> dependencies = DependencyParserDemo.getDependencies(text);
 		
-		//Extracting the nsubj dep relation
 		ExtractedResult result = new ExtractedResult();
 
 
@@ -80,7 +82,12 @@ public class ComponentExtractor {
 					
 			MainClause action= new MainClause();
 			
-			//extract the subject 
+			result.setCondVerb(nsubjGov.word());
+			action.setVerb(nsubjGov.word());
+			
+			/**
+			 * 
+			//extract the subject using tregex
 			if(nsubjDep!=null) {
 									
 				List <Tree> subjects = ConstituencyParsing.applyTregex( "NP [ !<< NP ]  << "+nsubjDep.word()  , ctree);
@@ -91,19 +98,49 @@ public class ComponentExtractor {
 					result.setSubject(nsubjDep.word());
 					action.setSubject(nsubjDep.word());
 				}					
-			}
+			} **/
+			Subject subject= new Subject();			
+			subject.setRootSubj(nsubjDep.word());
 			
-			
-	
-			/*
-			 * extract the comparator/relation's individual values of action /rule/transition
-			 * extracting transition's from to and object
-			 * extracting conditions/ conditional clauses
-			 */			
-			result.setCondVerb(nsubjGov.word());
-			action.setVerb(nsubjGov.word());
-			
-			for (TypedDependency dependency : dependencies) {			
+			for (TypedDependency dependency : dependencies) {
+				
+				// extract subject component for main clause
+				
+				
+				if( (dependency.gov().equals(nsubjDep)) && 
+						(dependency.reln().toString().equals("amod"))) {
+					if(!Util.isNullOrEmpty(subject.getAmod())) {
+						subject.setAmod(subject.getAmod()+" "+dependency.dep().word());
+					}else {
+						subject.setAmod(dependency.dep().word());
+					}
+				}
+				if( (dependency.gov().equals(nsubjDep)) && 
+						(dependency.reln().toString().equals("compound"))) {
+					if(!Util.isNullOrEmpty(subject.getCompound())) {
+						subject.setCompound(subject.getCompound()+" "+dependency.dep().word());
+					}else {
+						subject.setCompound(dependency.dep().word());
+					}
+				}
+				if( (dependency.gov().equals(nsubjDep)) && 
+						(dependency.reln().toString().contains("nmod"))) {
+					if(!Util.isNullOrEmpty(subject.getNmod())) {
+						subject.setNmod(subject.getNmod()+" "+dependency.dep().word());
+					}else {
+						subject.setNmod(dependency.dep().word());
+					}
+				}
+				if( ((dependency.gov().equals(nsubjDep))) && 
+						(dependency.reln().toString().contains("xsubj"))) {
+					if(!Util.isNullOrEmpty(subject.getControlledSubject())) {
+						subject.setControlledSubject(subject.getControlledSubject()+" "+dependency.dep().word());
+					}else {
+						subject.setControlledSubject(dependency.dep().word());
+					}
+				}				
+				
+				//extract the comparator/relation's individual values of action /rule/transition				
 				
 				if((dependency.reln().toString().equals("cop")) &&
 						((dependency.gov().equals(nsubjGov)))) {
@@ -143,8 +180,7 @@ public class ComponentExtractor {
 							action.setTo(to1.word());
 						}						
 					}
-				}
-				
+				}			
 				
 				
 				//extracting the conditional clauses
@@ -155,7 +191,7 @@ public class ComponentExtractor {
 					
 					IndexedWord depClauseVerb = dependency.dep();
 					
-					// sets conditional clause's verb
+					// extracts conditional clause's verb
 					result.setCondClause1Verb(dependency.gov().word());
 					condCl.setVerb(dependency.dep().word());
 					
@@ -164,22 +200,64 @@ public class ComponentExtractor {
 						// sets conditional clause's modifier
 						if((typDep.reln().toString().equals("advmod")) &&
 								((typDep.gov().equals(depClauseVerb)))) {
-								if(result.getCondClause1Modifier()!=null) {
+								if(!Util.isNullOrEmpty(condCl.getModifier())) {
 									result.setCondClause1Modifier(result.getCondClause1Modifier()+" "+typDep.dep().word());
-									condCl.setModifier(result.getCondClause1Modifier()+" "+typDep.dep().word());
+									condCl.setModifier(condCl.getModifier()+" "+typDep.dep().word());
 								} else {
 									result.setCondClause1Modifier(typDep.dep().word());
 									condCl.setModifier(typDep.dep().word());
-								}
-								
+								}								
 						}
 						
-						// sets conditional clause's subject
+						// find and sets conditional clause's subject
+
 						if((AppConstants.SUBJ_DEP_REL.contains(typDep.reln().toString())) &&
 								((typDep.gov().equals(depClauseVerb)))) {
-								result.setCondClause1Subj(typDep.dep().word());
-								condCl.setSubj(typDep.dep().word());
-						}
+							
+							IndexedWord nsubjDepCl = typDep.dep();
+							IndexedWord nsubjGovCl = typDep.gov();
+							
+							Subject condClauseSubj = new Subject();
+							condClauseSubj.setRootSubj(nsubjDepCl.word());
+							for (TypedDependency depp: dependencies) {
+								if( ((depp.gov().equals(nsubjDepCl))) && 
+										(depp.reln().toString().equals("amod"))) {
+									if(!Util.isNullOrEmpty(condClauseSubj.getAmod())) {
+										condClauseSubj.setAmod(condClauseSubj.getAmod()+" "+depp.dep().word());
+									}else {
+										condClauseSubj.setAmod(depp.dep().word());
+									}
+								}
+								if( ((depp.gov().equals(nsubjDepCl))) && 
+										(depp.reln().toString().equals("compound"))) {
+									if(!Util.isNullOrEmpty(condClauseSubj.getCompound())) {
+										condClauseSubj.setCompound(condClauseSubj.getCompound()+" "+depp.dep().word());
+									}else {
+										condClauseSubj.setCompound(depp.dep().word());
+									}
+								}
+							
+								if( ((depp.gov().equals(nsubjDepCl))) && 
+										(depp.reln().toString().contains("nmod"))) {
+									if(!Util.isNullOrEmpty(condClauseSubj.getNmod())) {
+										condClauseSubj.setNmod(condClauseSubj.getNmod()+" "+depp.dep().word());
+									}else {
+										condClauseSubj.setNmod(depp.dep().word());
+									}
+								}
+								if( ((depp.gov().equals(nsubjDepCl))) && 
+										(depp.reln().toString().contains("xsubj"))) {
+									if(!Util.isNullOrEmpty(condClauseSubj.getControlledSubject())) {
+										condClauseSubj.setControlledSubject(condClauseSubj.getControlledSubject()+" "+depp.dep().word());
+									}else {
+										condClauseSubj.setControlledSubject(depp.dep().word());
+									}
+								}
+							}
+							result.setCondClause1Subj(typDep.dep().word());
+							condCl.setSubj(condClauseSubj.toString());
+						}					
+						
 						
 						// sets conditional clause's conjunction relation
 						if((typDep.reln().toString().contains("conj")) &&
@@ -195,9 +273,9 @@ public class ComponentExtractor {
 						}					
 					}
 				conditions.add(condCl);					
-				}				
+				}
 			}
-			
+			action.setSubject(subject.toString());	
 		
 			// extract the comparator using constituency parsing
 			List <Tree> comparators = ConstituencyParsing.applyTregex( "QP  >>  (NP !<< NP ) >> (VP !<<VP)", ctree);

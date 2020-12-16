@@ -16,7 +16,7 @@ public class Starter {
 
 	public static void main(String[] args) {
 		try {
-			String filepath = "src/main/resources/rerm1-allgood.csv";
+			String filepath = "src/main/resources/Reqm_cleaned.csv";
 			List<Requirement> data = SmartCsvReader.readRequirementsFromCsv(filepath);
 						
 			Integer counter = 0;
@@ -28,10 +28,10 @@ public class Starter {
 				System.out.println(counter);
 				ExtractedResult result= new ExtractedResult();
 				//for debugging purpose
-				//if(counter==1) { result = ComponentExtractor.extractComponents(reqm.getRequirement());}
+				if(counter > 0) { result = ComponentExtractor.extractComponents(reqm.getRequirement());}
 				
 				
-				result = ComponentExtractor.extractComponents(reqm.getRequirement());	
+				//result = ComponentExtractor.extractComponents(reqm.getRequirement());	
 				result.setSno(reqm.getSno());
 				FormatterPrinter.printResult(result);
 				results.add(result);

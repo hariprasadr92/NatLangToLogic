@@ -26,13 +26,14 @@ public class MainClause {
 	
 	@Override
 	public String toString() {
-		StringBuffer clause = new StringBuffer();
+		StringBuilder clause = new StringBuilder();
 		
-		clause.append("( "+subject+" ");
+		clause.append("( "+subject.toString()+" ");
 		if(!Util.isNullOrEmpty(modifier)) {
 			clause.append(modifier+" ");
 		}
-		clause.append(verb+" ");
+		clause.append(Util.getComparatorSymbol(verb)+" ");
+		
 		if(!Util.isNullOrEmpty(value)) {
 			clause.append(value+" ");
 		}
@@ -42,6 +43,12 @@ public class MainClause {
 		if(!Util.isNullOrEmpty(obj)) {
 			clause.append(obj+" ");
 		}
+//		if(!Util.isNullOrEmpty(subject.getControlledSubject())) {
+//			clause.append(subject.getControlledSubject()+" ");
+//		}
+		
+		
+		
 		if(!Util.isNullOrEmpty(from)) {
 			clause.append(from+" ");
 		}

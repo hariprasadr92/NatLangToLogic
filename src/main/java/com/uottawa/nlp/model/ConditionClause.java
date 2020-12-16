@@ -1,5 +1,7 @@
 package com.uottawa.nlp.model;
 
+import java.util.Map;
+
 import com.uottawa.nlp.util.Util;
 
 import lombok.Data;
@@ -18,13 +20,15 @@ public class ConditionClause {
 	private String conj;
 	
 	@Override
-	public String toString() {
-		StringBuffer clause = new StringBuffer();
-		clause.append("( "+subj+" ");
+	public String toString() {		
+		
+		StringBuilder clause = new StringBuilder();
+		clause.append("( "+subj.toString()+" ");
 		if(!Util.isNullOrEmpty(modifier)) {
 			clause.append(modifier+" ");
 		}
-		clause.append(verb+" ");
+		
+		clause.append(Util.getComparatorSymbol(verb)+" ");
 		clause.append(" ) ");
 		if(!Util.isNullOrEmpty(conj)) {
 			clause.append(conj+" ");
