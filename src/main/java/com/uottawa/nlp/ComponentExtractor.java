@@ -2,6 +2,8 @@ package com.uottawa.nlp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.uottawa.nlp.model.ConditionClause;
 import com.uottawa.nlp.model.ExtractedResult;
@@ -99,13 +101,13 @@ public class ComponentExtractor {
 					action.setSubject(nsubjDep.word());
 				}					
 			} **/
-			Subject subject= new Subject();			
+			Subject subject= new Subject();
 			subject.setRootSubj(nsubjDep.word());
+			action.setSubjectPhrase(ExtractRelatedPhrase(dependencies, nsubjDep));
 			
 			for (TypedDependency dependency : dependencies) {
 				
-				// extract subject component for main clause
-				
+				// extract subject component for main clause				
 				
 				if( (dependency.gov().equals(nsubjDep)) && 
 						(dependency.reln().toString().equals("amod"))) {
@@ -160,11 +162,19 @@ public class ComponentExtractor {
 						action.setConj(dependency.reln().toString().substring(5));
 				}				
 				
-				// extracting transition's object
+				// extracting transition's object and it's related terms
 				if(dependency.gov().equals(nsubjGov) && dependency.reln().toString().equals("obj") ) {
 					result.setObj1(dependency.dep().word());
-					action.setObj(dependency.dep().word());
+					action.setObj(ExtractRelatedPhrase(dependencies,dependency.dep()));	
+
 				}
+				
+				// extracting a compared object
+				if(dependency.gov().equals(nsubjGov) && AppConstants.COMPARED_OBJ_OBL.contains(dependency.reln().toString())) {
+					
+					action.setComparedObj(ExtractRelatedPhrase(dependencies,dependency.dep()));
+				}
+
 				
 				// extracting transition's from and to values
 				if(dependency.gov().equals(nsubjGov) && 
@@ -215,7 +225,8 @@ public class ComponentExtractor {
 								((typDep.gov().equals(depClauseVerb)))) {
 							
 							IndexedWord nsubjDepCl = typDep.dep();
-							IndexedWord nsubjGovCl = typDep.gov();
+							
+							condCl.setSubjectPhrase(ExtractRelatedPhrase(dependencies, typDep.dep()));
 							
 							Subject condClauseSubj = new Subject();
 							condClauseSubj.setRootSubj(nsubjDepCl.word());
@@ -270,7 +281,13 @@ public class ComponentExtractor {
 								((typDep.gov().equals(depClauseVerb)))) {
 								result.setCondClause1Obj(typDep.dep().word());
 								condCl.setObj(typDep.dep().word());
-						}					
+								condCl.setObjectPhrase(ExtractRelatedPhrase(dependencies, typDep.dep()));
+						}
+						if(typDep.gov().equals(depClauseVerb) && AppConstants.COMPARED_OBJ_OBL.contains(typDep.reln().toString())) {
+							
+							condCl.setComparedObj(typDep.dep().word());
+							condCl.setComparedObjPhrase(ExtractRelatedPhrase(dependencies,typDep.dep()));
+						}
 					}
 				conditions.add(condCl);					
 				}
@@ -301,42 +318,134 @@ public class ComponentExtractor {
 			String unit = "";
 			String unit_second_part="";
 			String unit_third_part="";
+			Map<String, String> units = new TreeMap<String, String>();
 			
 			if(!values.isEmpty()) {
 				//List<IndexedWord> unitmatches = Semgrex.applySemgrex("{} >nummod{lemma:/"+result.getValue()+"/} ", dependencyGraph);
 				
-				
-				for (TypedDependency d : dependencies) {
-					
-	
+
+				IndexedWord nummod = new IndexedWord();
+				for (TypedDependency d : dependencies) {	
 					if(d.reln().toString().equals("nummod") &&
 							((d.dep().word()).equals(result.getValue()))) {				
-						unit= d.gov().word();				
-					}						
+						unit= d.gov().word();
+						units.put(String.valueOf(d.gov().index()), d.gov().word().toString());
+						nummod=d.gov();
+					}
 				}
+
+				for (TypedDependency d : dependencies) {	
+	
+					if(d.reln().toString().equals("compound") &&
+							((d.gov()).equals(nummod))) {				
+						units.put(String.valueOf(d.dep().index()), d.dep().word().toString());
+					}	
+					if(d.reln().toString().equals("punct") &&
+							((d.gov()).equals(nummod))) {				
+						units.put(String.valueOf(d.dep().index()), d.dep().word().toString());
+					}	
+				}
+				
 				for (TypedDependency d : dependencies) {
 					if(unit.length()>0 && d.reln().toString().equals("nmod") &&
 							((d.gov().word()).equals(unit))) {
-						unit_third_part=d.dep().word();				
+						unit_third_part=d.dep().word();		
+						units.put(String.valueOf(d.dep().index()), d.dep().word().toString());
 					}
 				}
 				for (TypedDependency d : dependencies) {
 					if(unit.length()>0 && unit_third_part.length()>0 && 
 							d.reln().toString().equals("dep") &&
 							((d.gov().word()).equals(unit_third_part))) {
-						unit_second_part=d.dep().word();				
+						unit_second_part=d.dep().word();	
+						units.put(String.valueOf(d.dep().index()), d.dep().word().toString());
+						
 					}	
 				}
-				
+
 			}		
-			result.setUnit(unit+unit_second_part+unit_third_part);		
-			action.setUnit(unit+unit_second_part+unit_third_part);
 			
+			
+			
+			//result.setUnit(unit+unit_second_part+unit_third_part);
+			result.setUnit(Util.getMapValues(units));		
+			action.setUnit(Util.getMapValues(units));
 			actions.add(action);
+
 		}
 		
 		result.setActions(actions);
 		result.setConditions(conditions);
 		return result;
-	}	
+	}
+	
+	private static String ExtractRelatedPhrase (List<TypedDependency> dependencies, IndexedWord mainWord ) {
+		
+		Map<String, String> biggerPhrase = new TreeMap<String, String>();
+		
+		biggerPhrase.put(String.valueOf(mainWord.index()), mainWord.word());
+		
+		for (TypedDependency tempDep : dependencies) {
+			if( (tempDep.gov().equals(mainWord)) && 
+					(tempDep.reln().toString().contains("nummod"))) {
+				biggerPhrase.put(String.valueOf(tempDep.dep().index()), tempDep.dep().word());
+			}
+			if( (tempDep.gov().equals(mainWord)) && 
+					(tempDep.reln().toString().contains("amod"))) {
+				biggerPhrase.put(String.valueOf(tempDep.dep().index()), tempDep.dep().word());
+			}
+			if( (tempDep.gov().equals(mainWord)) && 
+					(tempDep.reln().toString().contains("compound"))) {
+				biggerPhrase.put(String.valueOf(tempDep.dep().index()), tempDep.dep().word());
+				IndexedWord compound = tempDep.dep();
+				for (TypedDependency temp2Dep : dependencies) {
+					if( (temp2Dep.gov().equals(compound)) && 
+							(temp2Dep.reln().toString().contains("nmod"))) {
+						biggerPhrase.put(String.valueOf(temp2Dep.dep().index()), temp2Dep.dep().word());
+					}
+					if( (temp2Dep.gov().equals(compound)) && 
+							(temp2Dep.reln().toString().contains("nummod"))) {
+						biggerPhrase.put(String.valueOf(temp2Dep.dep().index()), temp2Dep.dep().word());
+					}
+					if( (temp2Dep.gov().equals(compound)) && 
+							(temp2Dep.reln().toString().contains("amod"))) {
+						biggerPhrase.put(String.valueOf(temp2Dep.dep().index()), temp2Dep.dep().word());
+					}
+				}
+			}
+			if( (tempDep.gov().equals(mainWord)) && 
+					(tempDep.reln().toString().contains("nmod"))) {
+				biggerPhrase.put(String.valueOf(tempDep.dep().index()), tempDep.dep().word());
+				
+				// taking the children of nmod
+				IndexedWord nmod = tempDep.dep();
+				for (TypedDependency temp2Dep : dependencies) {
+					if( (temp2Dep.gov().equals(nmod)) && 
+							(temp2Dep.reln().toString().contains("compound"))) {
+						biggerPhrase.put(String.valueOf(temp2Dep.dep().index()), temp2Dep.dep().word());
+						
+						IndexedWord compound = tempDep.dep();
+						for (TypedDependency temp3Dep : dependencies) {
+							if( (temp3Dep.gov().equals(compound)) && 
+									(temp3Dep.reln().toString().contains("nmod"))) {
+								biggerPhrase.put(String.valueOf(temp3Dep.dep().index()), temp3Dep.dep().word());
+							}
+							if( (temp3Dep.gov().equals(compound)) && 
+									(temp3Dep.reln().toString().contains("nummod"))) {
+								biggerPhrase.put(String.valueOf(temp3Dep.dep().index()), temp3Dep.dep().word());
+							}
+							if( (temp3Dep.gov().equals(compound)) && 
+									(temp3Dep.reln().toString().contains("amod"))) {
+								biggerPhrase.put(String.valueOf(temp3Dep.dep().index()), temp3Dep.dep().word());
+							}
+						}
+					}
+				}
+						
+			}
+		}
+		
+		return Util.getMapValues(biggerPhrase);
+		
+	}
 }

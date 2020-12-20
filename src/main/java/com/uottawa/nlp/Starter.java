@@ -16,25 +16,25 @@ public class Starter {
 
 	public static void main(String[] args) {
 		try {
-			String filepath = "src/main/resources/Reqm_cleaned.csv";
+			String filepath = "src/main/resources/Reqm_valid.csv";
 			List<Requirement> data = SmartCsvReader.readRequirementsFromCsv(filepath);
 						
-			Integer counter = 0;
+			Integer counter = -1;
 			
-			List<ExtractedResult> results =  new ArrayList<ExtractedResult>(Collections.EMPTY_LIST);
+			List<ExtractedResult> results =  new ArrayList<ExtractedResult>(Collections.EMPTY_LIST); 
 			
 			for (Requirement reqm: data ) {
-				counter++;
-				System.out.println(counter);
+				System.out.println(reqm.getSno());
 				ExtractedResult result= new ExtractedResult();
 				//for debugging purpose
-				if(counter > 0) { result = ComponentExtractor.extractComponents(reqm.getRequirement());}
+				//if(reqm.getSno()==56) { result = ComponentExtractor.extractComponents(reqm.getRequirement());
 				
 				
-				//result = ComponentExtractor.extractComponents(reqm.getRequirement());	
+				result = ComponentExtractor.extractComponents(reqm.getRequirement());	
 				result.setSno(reqm.getSno());
 				FormatterPrinter.printResult(result);
 				results.add(result);
+				//}
 			}			
 			
 			SmartCsvWriter.writeToFile(results);

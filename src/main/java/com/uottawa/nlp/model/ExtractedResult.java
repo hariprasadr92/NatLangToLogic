@@ -37,6 +37,7 @@ public class ExtractedResult {
 	@CsvBindByPosition(position = 6)    //g
 	private String condVerb;
 	
+
 	@CsvBindByPosition(position = 7)    //h
 	private String value;
 	

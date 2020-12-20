@@ -13,10 +13,12 @@ import lombok.Setter;
 public class MainClause {
 	
 	private String subject;
+	private String subjectPhrase;
 	private String modifier;
 	private String verb;
 	private String dependentVerb;
 	private String dependentmodifier;
+	private String comparedObj; 
 	private String value;
 	private String unit;
 	private String obj;
@@ -28,11 +30,18 @@ public class MainClause {
 	public String toString() {
 		StringBuilder clause = new StringBuilder();
 		
-		clause.append("( "+subject.toString()+" ");
+		clause.append("( ["+subjectPhrase+"] ");
 		if(!Util.isNullOrEmpty(modifier)) {
 			clause.append(modifier+" ");
 		}
 		clause.append(Util.getComparatorSymbol(verb)+" ");
+		
+		if(!Util.isNullOrEmpty(obj) && (Util.isNullOrEmpty(value))) {
+			clause.append("["+obj+"]"+" ");
+		}
+		if(!Util.isNullOrEmpty(comparedObj) && (Util.isNullOrEmpty(value))) {
+			clause.append("["+comparedObj+"]"+" ");
+		}
 		
 		if(!Util.isNullOrEmpty(value)) {
 			clause.append(value+" ");
@@ -40,9 +49,7 @@ public class MainClause {
 		if(!Util.isNullOrEmpty(unit)) {
 			clause.append(unit+" ");
 		}
-		if(!Util.isNullOrEmpty(obj)) {
-			clause.append(obj+" ");
-		}
+		
 //		if(!Util.isNullOrEmpty(subject.getControlledSubject())) {
 //			clause.append(subject.getControlledSubject()+" ");
 //		}

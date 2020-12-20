@@ -16,27 +16,16 @@ public class Subject {
 	private String amod;
 	private String nmod;
 	private String controlledSubject;
-	
-	
+		
 	@Override
 	public String toString() {
 		StringBuilder clause = new StringBuilder();
 		
 
-		clause.append("[");
-		if(!Util.isNullOrEmpty(amod)) {
-			clause.append(amod+" ");
-		}
-		if(!Util.isNullOrEmpty(compound)) {
-			clause.append(compound+" ");
-		}
-		if(!Util.isNullOrEmpty(rootSubj)) {
-			clause.append(rootSubj+" ");
-		}
-		if(!Util.isNullOrEmpty(nmod)) {
-			clause.append(nmod+" ");
-		}
-		clause.append("]");
+		clause.append("[ ");
+		clause.append(" ");
+		clause.append(controlledSubject);
+		clause.append(" ]");
 
 		
 		return clause.toString();

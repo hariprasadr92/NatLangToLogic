@@ -1,7 +1,9 @@
 package com.uottawa.nlp.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class Util {
 	
@@ -32,6 +34,32 @@ public class Util {
 
 		String comparator = comparators.get(comparatorPhrase);					
 		return (isNullOrEmpty(comparator))?comparatorPhrase:comparator;		
+	}
+	
+	public static void printMap(Map<String,String> map) {
+	    Set s = map.entrySet();
+	    Iterator it = s.iterator();
+	    while ( it.hasNext() ) {
+	       Map.Entry entry = (Map.Entry) it.next();
+	       String key = (String) entry.getKey();
+	       String value = (String) entry.getValue();
+	       System.out.print(key + " => " + value+" | ");
+	    }//while
+	    System.out.println("========================");
+	}//printMap
+	
+	public static String getMapValues(Map<String,String> map) {
+	    Set s = map.entrySet();
+	    Iterator it = s.iterator();
+       StringBuilder values = new StringBuilder();
+	    while ( it.hasNext() ) {
+	       Map.Entry entry = (Map.Entry) it.next();
+	       values.append(" ");
+	       values.append((String) entry.getValue());
+
+	    }//while
+	    
+	    return values.toString();
 	}
 	
 }
