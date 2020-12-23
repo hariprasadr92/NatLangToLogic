@@ -1,0 +1,21 @@
+AND-------------------------------
+
+{} >nsubj{}   >advmod {}
+{tag:/JJ.*/} [>nsubj{}    >advmod {}]
+
+OR --------------------------------
+{} >nsubj{}  | >advmod {}
+{} </nsubj|case/ {}
+
+
+chaining ---------------------------
+{} [ >dep {} ] [< nmod {}]
+
+named nodes ------------------------
+{}  </nsubj/ {}=gov | >/nsubj/ {}=dep
+
+issues :
+
+nmod:of - relns like this wont work
+{} [>nsubj{}  & >advmod {}] - & doesnt work
+{lemma:\/} [ >dep {} ] [< nmod {}] - how to escape slash

@@ -1,0 +1,2240 @@
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_1_1;
+Signals w_sat;
+Constants T=86400;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+The angular velocity of the satellite should always be lower than 1.5m/s, 
+i.e., the modulus of the satellite angular velocity w must be less or equal to 1.5m/s.";
+Specification: 
+(
+	forall t in [ 2700 , T ]:
+	 ({ ||w_sat(t)||  < 1.5 })
+);
+
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_1_2;
+Signals q_estimate;
+Constants T=86400;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+The estimated altitude of the satellite should be always equal to 1";
+Specification: 
+(
+	forall t in [ 2700 , T ]:
+	 ({ || q_estimate(t) || = 1 })
+);
+
+
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_1_3;
+Signals torque;
+Constants T=86400;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+the maximum reaction torque (torque) must be equal to 0.015 Nm";
+Specification: 
+(
+	forall t in [ 2700 , T ]:
+	 (
+	 	({ || torque(t) || <= 0.015 }) and 
+	 	( exists t1 in  [ 0 , T ]:
+		 	(
+		 		{|| torque(t1) || = 0.015}
+		 	)
+	 	)
+	 )
+);
+
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_1_4;
+Signals q_error,q_target,q_real,q_estimate;
+Constants T=86400;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+The satellite should reach the desired position within 2700 s";
+Specification: 
+(	forall t in [ 2700 , T ]:
+	 (
+	 	{q_error(t) <= 2}
+	 )
+);
+
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_1_4_1;
+Signals q_real,q_estimate;
+Constants T=86400;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+The satellite should estimates its position correctly within 2000 s";
+Specification: 
+(
+	forall t in [ 2700 , T ]:
+	 (
+	 	{||q_real(t)-q_estimate(t)|| <=2}
+	 )
+);
+
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_1_5;
+Signals sm,q_real,q_estimate;
+Constants T=86400;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+After the satellite enters the safe pin mode , the satellite should reach the desired position within 2000 s,
+the difference between qreal and qtarget at t= 2000s should be close to 0";
+Specification: 
+(	forall t in [ 2700 , T ]:
+	(
+		( 
+			({ sm(t) = 0 }) and 
+			(forall t1 in [t,t+1]: ({sm(t1)=1}))
+		) implies
+		(	 	
+			{||q_real(t+2000)-q_estimate(t+2000)|| = 0}
+		)
+	)
+);
+
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_2_1;
+Signals KE,CE,PE;
+Constants T=86400, e=2;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+The satellite shall constantly keep its attitude (denoted by q) pointing towards the earth";
+Specification: 
+(	exists t1 in [ 2700 , T ]:
+	 (
+	 	forall t in [ t1 , T ]:
+	 	(	
+	 		{ KE(t) < e } and { CE(t) < e } and { PE(t) < e }
+	 	)
+	 )	 
+);
+
+Oracle 
+ModelName: Lux_Model;
+Path: ./Lux_Model/;
+ID: Lux_Req_2_2;
+Signals rw_h;
+Constants T=86400;
+Description: "
+SatEx model:
+A satellite control system which helps always keep the satellite on the desired orbit, 
+ensures that the satellite is always facing the earth, and regulates the satellite speed. 
+Requirement:
+The satellite reation wheels shall never be saturated. That is, the angular momentum of each reaction wheel 
+(denoted by h_rw[i] for the i'th reaction wheel) should not exceed 0.2 at any time.";
+Specification: 
+(	
+	forall t in [ 2700 , T ]:
+	(
+		{ rw_h(t) < 0.2 }
+	)
+);
+
+
+Oracle 
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_1;
+Signals APEng,AilCmd;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+When the pilot selects the autopilot engage switch in the 
+cockpit then roll autopilot shall engage and  when the switch is deselected 
+then the autopilot shall disengage and when is not egaged then the command 
+to the roll actuator shall be zero";
+Specification: 
+(forall t in [ 1 , T ]:
+	(
+		(
+			( ( { APEng(t-1) = 1 } and { APEng(t) = 0 } ) implies { AilCmd(t)=0 } ) 
+			and
+			( ( { APEng(t-1) = 0 } and { APEng(t) = 1 } ) implies { AilCmd(t)!=0 } )
+		) 	
+	)
+);		
+
+
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_2;
+Signals APEng,isRoll,HDGMode,ALTMode;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+When the autopilot is engaged ∧ no other lateral mode (HDG Mode, ALT Mode) is active
+Then roll hold mode shall be the active mode.";
+Specification: 
+(forall t in [ 0 , T ]: 
+	(
+		( { APEng(t) = 1 } and { HDGMode(t) = 0 }  and { ALTMode(t) = 0 }
+		) implies { isRoll(t) = 1 }
+	)
+);
+
+
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_3;
+Signals Phi,Tk,RollMode,PhiRef;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+When roll hold mode becomes the active mode
+Then
+If the actual roll angle is less than 6 degrees in either direction at the time of roll hold
+engagement
+Then the roll hold reference shall be set to zero
+Elseif the actual roll angle > 30 degrees at the time of roll hold engagement
+Then The roll hold reference shall be set to 30 degrees in the same direction as the
+actual roll angle
+Elseif the turn knob is commanding 3 degrees or more in either direction
+Then the roll reference shall be set to the cockpit turn knob command, up to a 30
+degree limit
+Else the roll hold reference shall be set to the actual roll attitude of the aircraft
+";
+Specification: 
+(forall t in [ 0 , T ]:
+	(
+		({ RollMode(t) = 1 } ) implies 
+		( 
+				( ( { Phi(t) < 6 } and { Phi(t) > (-6) } ) implies ( { PhiRef(t) = 0 } ) ) 
+				and
+				( { Phi(t) < -30 } implies { PhiRef(t)=-30 } ) 
+				and
+				( { Phi(t) > 30 } implies { PhiRef(t)=30 } ) 
+				and
+				(( { Tk(t) <= -3 } and { Tk(t) >= -30 } ) implies ( { PhiRef(t)=Tk(t) } )) 
+				and
+				(( { Tk(t) <= 30 } and { Tk(t) >= 3 } ) implies ( { PhiRef(t)=Tk(t) } )) 
+				and
+				(
+					( 
+						( not( { Phi(t) < 6 } and { Phi(t) > (-6) } ) ) and 
+						( not { Phi(t) < -30 } ) and 
+						( not { Phi(t) > 30 } ) and
+						( not ( { Tk(t) <= -3 } ) and ( { Tk(t) >= -30 } ) ) and
+						( not ( { Tk(t) <= 30 } ) and ( { Tk(t) >= 3 } ) ) 
+					) implies ( { Phi(t)=Tk(t) } )
+				)
+		)	
+	)			
+);
+
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_3_1;
+Signals Phi,Tk,RollMode,PhiRef;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+When roll hold mode becomes the active mode
+Then
+If the actual roll angle is less than 6 degrees in either direction at the time of roll hold
+engagement
+Then the roll hold reference shall be set to zero
+Elseif the actual roll angle > 30 degrees at the time of roll hold engagement
+Then The roll hold reference shall be set to 30 degrees in the same direction as the
+actual roll angle
+Elseif the turn knob is commanding 3 degrees or more in either direction
+Then the roll reference shall be set to the cockpit turn knob command, up to a 30
+degree limit
+Else the roll hold reference shall be set to the actual roll attitude of the aircraft
+";
+Specification: 
+(forall t in [ 0 , T ]:
+	(
+		({ RollMode(t) = 1 } ) implies 
+		( 
+				( ( { Phi(t) < 6 } and { Phi(t) > (-6) } ) implies ( { PhiRef(t) = 0 } ) ) 
+				and
+				( { Phi(t) < -30 } implies { PhiRef(t)=-30 } ) 
+				and
+				( { Phi(t) > 30 } implies { PhiRef(t)=30 } ) 
+				and
+				(( { Tk(t) <= -3 } and { Tk(t) >= -30 } ) implies ( { PhiRef(t)=Tk(t) } )) 
+				and
+				(( { Tk(t) <= 30 } and { Tk(t) >= 3 } ) implies ( { PhiRef(t)=Tk(t) } )) 
+
+		)	
+	) 
+ );
+ 
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_4_1;
+Signals Tk,Phi,PhiRef;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+Steady state roll commands shall be tracked within 1 degree in calm air
+";
+Specification: 
+(forall tc in [ 1 , T ]:
+(	
+	( { Tk(tc) != Tk(tc-1) } ) implies 
+	(	exists t2 in [ tc , T ]:
+				(
+					forall t in [ t2 , T ]:
+					(
+						{ Phi(t) - PhiRef(t) <= 1 }
+					)
+				)
+	)	
+)
+);
+
+
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_4_2;
+Signals Tk,Phi,PhiRef;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+Response to roll step commands shall not exceed 10% overshoot in calm air
+";
+Specification: 
+(forall tc in [ 1 , T ]:
+(
+	( { Tk(tc) != Tk(tc-1) } ) implies
+		(
+			exists tr in [tc , T]:
+			(
+				( { |Phi(tr)-PhiRef(tr)| <= 10 } ) and (
+					forall t in [tr , T]:
+					(
+						{ |Phi(tr)-PhiRef(tr)| <= 10 }
+					)
+				)
+			)
+		)
+)
+);
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_5;
+Signals Tk,P;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+When the turn Knob is commanded large commands
+Then the maximum roll rate P shall be 6 deg/sec +/- 10%
+";
+Specification: 
+(forall tc in [ 1 , T ]:
+(
+	( { Tk(tc) - Tk(tc-1) >= 30 } ) implies
+		(
+			forall t in [ tc , T ]:
+			( { P(t) <= 6.6 } )
+		)
+)
+);
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_6;
+Signals Phi;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+The maximum roll angle (Phi) allowed shall be 30 deg +/-10% in calm air
+";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Phi(t) <= 33 } and { Phi(t) >= -33 } 
+	)
+);
+
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_7;
+Signals AilCmd;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+The maximum aileron command (AilCmd) allowed shall be 15 deg
+";
+Specification: 
+(forall t in [ 0 , T ]:
+(
+	{ AilCmd(t) <= 15 } and { AilCmd(t) >= -15 }
+)
+);
+
+
+Oracle 
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_8;
+Signals HDGMode,isRoll;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+When the pilot selects the heading switch in the 
+cockpit (HDGMode) 
+then Heading Hold shall become the active mode
+And when the switch is deselected 
+then Heading Hold shall be disactivated";
+Specification: 
+(forall t in [ 1 , T ]:
+(
+	(
+		( ( { HDGMode(t-1) = 0 } and { HDGMode(t) = 1 } ) implies { isRoll(t)=0 } ) and
+		( ( { HDGMode(t-1) = 1 } and { HDGMode(t) = 0 } ) implies { isRoll(t)=1 } )
+	) 
+)
+);
+
+	
+	
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_10_1;
+Signals Psi,HDGRef;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+Steady state heading commands shall be tracked within 1 degree in calm air
+";
+Specification: 
+(forall tc in [1 , T]:
+(
+	( { HDGRef(tc) != HDGRef(tc-1) } ) implies 
+		(	exists t2 in [tc , T]:
+					(
+						forall t in [ t2 , T ]:
+						(
+							{ Psi(t) - HDGRef(t) <= 1 }
+						)
+					)
+		)
+)
+);
+
+Oracle
+ModelName: Autopilot_Model;
+Path: ./Autopilot/;
+ID: Autopilot_Req_1_10_2;
+Signals Psi,HDGRef;
+Constants T=200000;
+Description: "
+Autopilot model:
+A full six degree of freedom simulation of a single-engined high-wing propeller-driven airplane with autopilot.
+A six degree of freedom simulation enables movement and rotation of a rigid body in three-dimensional space.
+Requirement:
+Response to heading step commands shall not exceed 10% overshoot in calm air
+";
+Specification: 
+(forall tc in [ 1 , T ]:
+(	{ HDGRef(tc) != HDGRef(tc-1) } implies
+	(
+		exists tr in [tc , T]:
+		(
+			{ |Psi(tr)-HDGRef(tr)| <= 10 } and (
+				forall t in [tr , T]:
+				(
+					{ |Psi(tr)-HDGRef(tr)| <= 10 }
+				)
+			)
+		)
+	)	
+)
+);
+
+
+
+Oracle
+ModelName: EB_Model;
+Path: ./EB/;
+ID: EB_Req_1;
+Signals ridge_on,check;
+Constants T=200000;
+Description: "
+When the determinant of B(inv(Wp’)B’ is <= 1e-12 as indicated by ridge_on set 
+to True, the inversion of the B(inv(Wp’)B’ matrix should be accurate to 6 digits
+precision in that each element in the check output matrix is within a 1e-6 tolerance 
+with respect to the elements of a 3x3 identity matrix.
+";
+Specification: 
+(forall t in [ 0 , T ]:
+	(
+		( { ridge_on(t) = 1 } implies { |check[1][1](t) - 1| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[1][2](t) - 0| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[1][3](t) - 0| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[2][1](t) - 0| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[2][2](t) - 1| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[2][3](t) - 0| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[3][1](t) - 0| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[3][2](t) - 0| < 0.000001 } ) and
+		( { ridge_on(t) = 1 } implies { |check[3][3](t) - 1| < 0.000001 } )
+	)
+);
+
+
+
+Oracle
+ModelName: EB_Model;
+Path: ./EB/;
+ID: EB_Req_2;
+Signals ridge_on,check;
+Constants T=200000;
+Description: "
+When the determinant of B(inv(Wp’)B’ is > 1e-12 as indicated by ridge_on set 
+to False, the inversion of the B(inv(Wp’)B’ matrix should be accurate to 12 digits
+precision in that each element in the check output matrix is within a 1e-12 tolerance
+with respect to the elements of a 3x3 identity matrix.
+";
+Specification: 
+(forall t in [ 0 , T ]:
+	(
+		( { ridge_on(t) = 0 } implies { |check[1][1](t) - 1| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[1][2](t) - 0| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[1][3](t) - 0| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[2][1](t) - 0| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[2][2](t) - 1| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[2][3](t) - 0| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[3][1](t) - 0| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[3][2](t) - 0| < 0.000000000001 } ) and
+		( { ridge_on(t) = 0 } implies { |check[3][3](t) - 1| < 0.000000000001 } )
+	)
+);
+
+Oracle
+ModelName: EB_Model;
+Path: ./EB/;
+ID: EB_Req_4;
+Signals Buminusd;
+Constants T=200000;
+Description: "
+The 2-norm of the output Buminusd should be less than 0.01.
+";
+Specification: 
+(forall t in [ 0 , T ]:
+	(
+		{ sqrt
+			( 
+				( Buminusd[1][1](t) * Buminusd[1][1](t) ) + ( Buminusd[2][1](t) * Buminusd[2][1](t) ) + ( Buminusd[3][1](t) * Buminusd[3][1](t) ) 
+			) < 0.01 }
+		
+	)
+);
+
+ 
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_1;
+Signals DCM321,Phi,Psi,Theta;
+Constants T=200000;
+Description: "
+The Rotation Matrix Output, DCM321, of this Function Shall Equal a 3x3 Matrix Product
+of a 3x3 Euler 3 (Roll) Rotation Matrix times a 3x3 Euler 2 (Pitch) Rotation Matrix 
+times a 3x3 Euler 1 (Heading) Rotation Matrix.
+";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+		(
+			{ DCM321[1][1](t) = ( ( cos( Psi(t) ) ) * ( cos( Theta(t) ) ) ) } 
+			and
+			{ DCM321[2][1](t) = ( ( sin( Psi(t) ) ) * ( cos( Theta(t) ) ) ) } 
+			and
+			{ DCM321[1][3](t) = ( -1 * ( sin( Theta(t) ) ) ) } 
+			and
+			{ DCM321[2][1](t) = ( -1 * ( cos( Phi(t) ) * sin( Psi(t) ) ) + ( sin( Phi(t) ) * sin( Theta(t) ) * cos( Psi(t) ) ) ) } 
+			and  
+			{ DCM321[2][2](t) = ( ( cos( Phi(t) ) * cos( Psi(t) ) ) + ( sin( Phi(t) ) * sin( Theta(t) ) * sin( Psi(t) ) ) )} 
+			and
+			{ DCM321[2][3](t) = ( sin( Phi(t) ) * cos( Theta(t) ) ) } 
+			and
+			{ DCM321[3][1](t) = ( ( sin( Phi(t) ) * sin( Psi(t) ) ) + ( cos( Phi(t) ) * sin( Theta(t) ) * cos( Psi(t) ) ) )} 
+			and
+			{ DCM321[3][2](t) = ( ( -1 * ( sin( Phi(t) ) )* cos(Psi(t)) ) + ( cos(Phi(t)) * sin(Theta(t)) * sin( Psi(t) ) ) ) } 
+			and				
+			{ DCM321[3][3](t) = ( cos( Phi(t) ) * cos( Theta(t) ) ) }
+		)
+);
+
+
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_2;
+Signals DCM321,Vb,VI;
+Constants T=200000;
+Description: "
+The Body Vector Output, Vb, of this Function Shall Equal a 3x1 Vector Product of 
+the 3x3 Rotation Matrix Output, DCM321, times the Input Inertial Vector, VI.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Vb[1](t) = ( ( DCM321[1][1](t) * VI[1](t) ) + ( DCM321[1][2](t) * VI[2](t) ) + ( DCM321[1][3](t) * VI[3](t) ) ) } and
+    	{ Vb[2](t) = DCM321[2][1](t) * VI[1](t) + DCM321[2][2](t) * VI[2](t) + DCM321[2][3](t)*VI[3](t) } and
+    	{ Vb[3](t) = ( DCM321[3][1](t) * VI[1](t) ) + ( DCM321[3][2](t) * VI[2](t) ) + ( DCM321[2][3](t) * VI[3](t) ) }
+	)
+);
+
+
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_3;
+Signals Vb,VI;
+Constants T=200000;
+Description: "
+The magnitude of the Body Vector Output, Vb, shall equal the magnitude of the Input Inertial Vector, VI.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ ( Vb[1](t) * Vb[1](t) ) + ( Vb[2](t) * Vb[2](t) ) + ( Vb[3](t) * Vb[3](t) ) = ( VI[1](t) * VI[1](t) ) + ( VI[2](t)*VI[2](t) ) + ( VI[3](t)*VI[3](t) ) }
+	)
+);
+
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_4;
+Signals DCM321;
+Constants T=200000;
+Description: "
+The Rotation Matrix, DCM321, shall be invertible with the exception of the case where Theta = +/- pi/2 radians";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{
+			( ( DCM321[1][1](t) * DCM321[2][2](t) ) * DCM321[3][3](t) ) - 
+			( ( DCM321[1][1](t) * DCM321[2][3](t) ) * DCM321[3][2](t) ) - 
+			( ( DCM321[1][2](t) * DCM321[2][1](t) ) * DCM321[3][3](t) ) + 
+			( ( DCM321[1][2](t) * DCM321[2][3](t) )* DCM321[3][1](t) ) + 
+			( ( DCM321[1][3](t) * DCM321[1][2](t) ) * DCM321[3][2](t) ) - 
+			( ( DCM321[1][3](t) * DCM321[2][2](t) ) * DCM321[3][1](t) ) != 0.0
+		}
+	)
+);
+
+
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_5_1;
+Signals Vb,VI,Phi,Psi,Theta;
+Constants T=200000;
+Description: "
+The Rotation Matrix, DCM321, shall provide a distinct mapping from the input vector, VI, to the output vector,
+ Vb, for each pitch angle, Theta.  Note:  the DCM321 is not distinct for all Phi and Psi inputs
+";
+Specification: 
+(	forall t in [ 0 , T ]:
+	(		{ Vb[1](t) = 
+				VI[1](t) * cos(Psi(t)) * cos(Theta(t)) +
+				VI[2](t) * sin(Psi(t)) * cos(Theta(t)) - 
+				VI[3](t) * sin(Theta(t))
+			}
+			 and
+			{ Vb[2](t) = 
+				VI[1](t) * (-cos(Phi(t)) * sin(Psi(t)) + sin(Phi(t)) * cos(Psi(t)) * sin(Theta(t))) +
+				VI[2](t) * (cos(Phi(t)) * cos(Psi(t)) + sin(Phi(t)) * sin(Psi(t)) * sin(Theta(t))) +
+				VI[3](t) * sin(Phi(t)) * cos(Theta(t))
+			}
+			 and
+			{ Vb[3](t) = 
+				VI[1](t) * (sin(Phi(t)) * sin(Psi(t)) + cos(Phi(t)) * cos(Psi(t)) * sin(Theta(t))) + 
+				VI[2](t) * (-sin(Phi(t)) * cos(Psi(t)) + cos(Phi(t)) * sin(Psi(t)) * sin(Theta(t))) + 
+				VI[3](t) * cos(Phi(t)) * cos(Theta(t))
+			} 			
+			
+	)
+);
+
+
+
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_6_1;
+Signals DCM321;
+Constants T=200000;
+Description: "
+The rows and columns of the Rotation Matrix, DCM321, shall be orthonormal.  
+For instance, denoting r1 as row 1 and r2 as row 2 of DCM321, <r1, r2> = r1 r2T = 0 and <r1, r1> = r1 r1T = 1. 
+Likewise, with c1 as column 1 and c2 as column 2 of DCM321, <c1, c2> = c1 c2T = 0 and <c1, c1> = c1 c1T = 1.
+";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ DCM321[1][1](t)*DCM321[1][1](t) + DCM321[1][2](t)*DCM321[1][2](t) + DCM321[1][3](t)*DCM321[1][3](t) = 1.0 } and
+	    { DCM321[1][1](t)*DCM321[2][1](t) + DCM321[1][2](t)*DCM321[2][2](t) + DCM321[1][3](t)*DCM321[2][3](t) = 0.0 } and
+	    { DCM321[1][1](t)*DCM321[3][1](t) + DCM321[1][2](t)*DCM321[3][2](t) + DCM321[1][3](t)*DCM321[3][3](t) = 0.0 } and
+	    { DCM321[2][1](t)*DCM321[1][1](t) + DCM321[2][2](t)*DCM321[1][2](t) + DCM321[2][3](t)*DCM321[1][3](t) = 0.0 } and
+	    { DCM321[2][1](t)*DCM321[2][1](t) + DCM321[2][2](t)*DCM321[2][2](t) + DCM321[2][3](t)*DCM321[2][3](t) = 1.0 } and
+	    { DCM321[2][1](t)*DCM321[3][1](t) + DCM321[2][2](t)*DCM321[3][2](t) + DCM321[2][3](t)*DCM321[3][3](t) = 0.0 } and
+	    { DCM321[3][1](t)*DCM321[1][1](t) + DCM321[3][2](t)*DCM321[1][2](t) + DCM321[3][3](t)*DCM321[1][3](t) = 0.0 } and
+	    { DCM321[3][1](t)*DCM321[2][1](t) + DCM321[3][2](t)*DCM321[2][2](t) + DCM321[3][3](t)*DCM321[2][3](t) = 0.0 } and
+	    { DCM321[3][1](t)*DCM321[3][1](t) + DCM321[3][2](t)*DCM321[3][2](t) + DCM321[3][3](t)*DCM321[3][3](t) = 1.0 }	    								
+	)
+);
+
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_6_2;
+Signals DCM321;
+Constants T=200000;
+Description: "
+The rows and columns of the Rotation Matrix, DCM321, shall be orthonormal.  
+For instance, denoting r1 as row 1 and r2 as row 2 of DCM321, <r1, r2> = r1 r2T = 0 and <r1, r1> = r1 r1T = 1. 
+Likewise, with c1 as column 1 and c2 as column 2 of DCM321, <c1, c2> = c1 c2T = 0 and <c1, c1> = c1 c1T = 1.
+";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ DCM321[1][1](t)*DCM321[1][1](t) + DCM321[2][1](t)*DCM321[2][1](t) + DCM321[3][1](t)*DCM321[3][1](t) = 1.0 } and
+		{ DCM321[1][1](t)*DCM321[1][2](t) + DCM321[2][1](t)*DCM321[2][2](t) + DCM321[3][1](t)*DCM321[3][2](t) = 0.0 } and
+	    { DCM321[1][1](t)*DCM321[1][3](t) + DCM321[2][1](t)*DCM321[2][3](t) + DCM321[3][1](t)*DCM321[3][3](t) = 0.0 } and
+	    { DCM321[1][2](t)*DCM321[1][1](t) + DCM321[2][2](t)*DCM321[2][1](t) + DCM321[3][2](t)*DCM321[3][1](t) = 0.0 } and
+	    { DCM321[1][2](t)*DCM321[1][2](t) + DCM321[2][2](t)*DCM321[2][2](t) + DCM321[3][2](t)*DCM321[3][2](t) = 1.0 } and
+	    { DCM321[1][2](t)*DCM321[1][3](t) + DCM321[2][2](t)*DCM321[2][3](t) + DCM321[3][2](t)*DCM321[3][3](t) = 0.0 } and
+	    { DCM321[1][3](t)*DCM321[1][1](t) + DCM321[2][3](t)*DCM321[2][1](t) + DCM321[3][3](t)*DCM321[3][1](t) = 0.0 } and
+	    { DCM321[1][3](t)*DCM321[1][2](t) + DCM321[2][3](t)*DCM321[2][2](t) + DCM321[3][3](t)*DCM321[3][2](t) = 0.0 } and
+	    { DCM321[1][3](t)*DCM321[1][3](t) + DCM321[2][3](t)*DCM321[2][3](t) + DCM321[3][3](t)*DCM321[3][3](t) = 1.0 }	    								
+	)
+);
+
+
+
+Oracle
+ModelName: Euler_Model;
+Path: ./Euler/;
+ID: Euler_Req_8;
+Signals DCM321;
+Constants T=200000;
+Description: "
+The Rotation Matrix, DCM321, shall be invertible with the exception of the case where Theta = +/- pi/2 radians";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ DCM321[1][1](t) * DCM321[2][2](t) * DCM321[3][3](t) - DCM321[1][1](t) * DCM321[2][3](t) * DCM321[3][2](t) - DCM321[1][2](t) * DCM321[2][1](t) * DCM321[3][3](t) + DCM321[1][2](t) * DCM321[2][3](t) * DCM321[3][1](t) + DCM321[1][3](t) * DCM321[2][1](t) * DCM321[3][2](t)  - DCM321[1][3](t) * DCM321[2][2](t) * DCM321[3][1](t) = 1.0 }
+	)	
+);
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_1;
+Signals Standby, Apfail, Supported, Limits, pullup;
+Constants T=2000;
+Description: "
+Exceeding sensor  Limits shall latch an autopilot pullup when the pilot 
+is not in control (not Standby) and the system is Supported without failures (not Apfail)";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		(
+			 { Standby(t) = 0 } and { Apfail(t) = 0 } and { Supported(t) = 1 } and { Limits(t) = 1 } 
+		) implies
+		{ pullup(t) = 1 }
+	)
+);
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_2;
+Signals Standby,state;
+Constants T=2000;
+Description: "
+The autopilot shall change states from TRANSITION to STANDBY when the pilot is in control (Standby). ";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { state(t-1) = 0 } and { Standby(t) = 1 } ) implies { state(t) = 3 }
+	)
+);
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_3;
+Signals Supported,state,good;
+Constants T=2000;
+Description: "
+The autopilot shall change states from TRANSITION to NOMINAL when the system is Supported and sensor data is good. ";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { state(t-1) = 0 } and { Supported(t) = 1 } and { good(t-1) = 1 }) implies { state(t) = 1 }
+	)
+);
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_4;
+Signals state, good;
+Constants T=2000;
+Description: "
+The autopilot shall change states from NOMINAL to MANEUVER when the sensor data is not good ";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		({ state(t-1) = 1 } and { good(t-1) = 0 }) implies { state(t) = 2 }
+	)
+);
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_5;
+Signals state, Standby;
+Constants T=2000;
+Description: "
+The autopilot shall change states from NOMINAL to STANDBY when the pilot is in control (Standby).";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		({ state(t-1) = 1 } and { Standby(t) = 1 }) implies { state(t) = 3 }
+	)
+);
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_6;
+Signals state, good, Standby;
+Constants T=2000;
+Description: "
+The autopilot shall change states from MANEUVER to STANDBY when the pilot is in control (Standby) and sensor data is good";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { state(t-1) = 2 } and { good(t-1) = 1 } and { Standby(t) = 1 }) implies { state(t) = 3 }
+	)
+);
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_7;
+Signals state, good, Supported;
+Constants T=2000;
+Description: "
+The autopilot shall change states from PULLUP to TRANSITION when the system is Supported and sensor data is good";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { state(t-1) = 2 } and { Supported(t) = 1 } and { good(t-1) = 1 } ) implies { state(t) = 0 }
+	)
+);
+
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_8;
+Signals state, good, Standby;
+Constants T=2000;
+Description: "
+The autopilot shall change states from STANDBY to TRANSITION when the pilot is not in control (not Standby)";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { state(t-1) = 3 } and { Standby(t) = 0 } ) implies { state(t) = 0 }
+	)
+);
+
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_9;
+Signals state, Apfail;
+Constants T=2000;
+Description: "
+The autopilot shall change states from STANDBY to MANEUVER when a failure occurs (Apfail)";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { state(t-1) = 3 } and { Apfail(t) = 1 } ) implies { state(t) = 2 }
+	)
+);
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_10;
+Signals Limits,SENSTATE;
+Constants T=2000;
+Description: "
+ The sensor shall change states from NOMINAL to FAULT when Limits are exceeded.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { SENSTATE(t-1) = 0 } and { Limits(t) = 1 } ) implies { SENSTATE(t) = 2 }
+	)
+);
+
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_11;
+Signals REQUEST,SENSTATE;
+Constants T=2000;
+Description: "
+The sensor shall change states from NOMINAL to TRANSITION when the autopilot is not REQUESTing support (not REQUEST).";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { SENSTATE(t-1) = 0 } and { REQUEST(t) = 0 } ) implies { SENSTATE(t) = 1 }
+	)
+);
+
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_12;
+Signals REQUEST,Limits,SENSTATE;
+Constants T=2000;
+Description: "
+The sensor shall change states from FAULT to TRANSITION when the autopilot
+is not REQUESTing support (not REQUEST) and Limits are not exceeded (not Limits).";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { SENSTATE(t-1) = 2 } and { REQUEST(t) = 0 } and { Limits(t) = 0 } ) implies { SENSTATE(t) = 1 }
+	)
+);
+
+
+
+Oracle
+ModelName: FSM_Model;
+Path: ./FSM/;
+ID: FSM_Req_13;
+Signals REQUEST,MODE,SENSTATE;
+Constants T=2000;
+Description: "
+The sensor shall change states from TRANSITION to NOMINAL when the autopilot
+is REQUESTing support (REQUEST) and the autopilot reports the correct active MODE (MODE).";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { SENSTATE(t-1) = 1 } and { REQUEST(t) = 1 } and { MODE(t) = 1 } ) implies { SENSTATE(t) = 0 }
+	)
+);
+
+Oracle
+ModelName: NL_Model;
+Path: ./NL_Model/;
+ID: NL_Req_6;
+Signals xtarg,yout,Xap2,vv,vt;
+Constants T=2000;
+Description: "
+The sensor shall change states from TRANSITION to NOMINAL when the autopilot
+is REQUESTing support (REQUEST) and the autopilot reports the correct active MODE (MODE).";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { xtarg[1](t) = xtarg[1](t-1) } and { xtarg[2](t) = xtarg[2](t-1) } and { xtarg[3](t) = xtarg[3](t-1) } and { yout[1](t) = Xap2[1](t) } and { yout[2](t) = Xap2[2](t) } and { yout[3](t) = Xap2[3](t) } 
+			and { yout[1](t-1) = Xap2[1](t-1) } and { yout[2](t-1) = Xap2[2](t-1) } and { yout[3](t-1) = Xap2[3](t-1) } )	
+			implies 
+			{
+			    (
+			        ( ( yout[1](t) - yout[1](t-1) ) * ( yout[1](t) - yout[1](t-1) ) ) + 
+			        ( ( yout[2](t) - yout[2](t-1) ) * ( yout[2](t) - yout[2](t-1) ) ) + 
+			        ( ( yout[3](t) - yout[3](t-1) ) * ( yout[3](t) - yout[3](t-1) ) )
+			    ) <= 0.0004 * (
+			        ( vv[1](t) + vt[1](t) ) * ( vv[1](t) + vt[1](t) ) + 
+			        ( vv[2](t) + vt[2](t) ) * ( vv[2](t) + vt[2](t) ) +
+			        ( vv[3](t) + vt[3](t) ) * ( vv[3](t) + vt[3](t) )
+			    )
+			}
+	)
+); 
+
+Oracle
+ModelName: Neural_Model;
+Path: ./Neural_Model/;
+ID: Neural_Req_1;
+Signals z;
+Constants T=2000;
+Description: "
+Neural Network Model:
+A two-input single-output predictor neural network model with two hidden layers.
+Requirement:
+The maximum value of the NN output, z, shall always be less than or equal to 1.1, regardless of the input values.";
+Specification: 
+(
+	forall t in [ 0 , T ]: (
+	{ z(t) <= 1.1 }
+	)
+);
+
+
+Oracle
+ModelName: Neural_Model;
+Path: ./Neural_Model/;
+ID: Neural_Req_2;
+Signals z;
+Constants T=2000;
+Description: "
+Neural Network Model:
+A two-input single-output predictor neural network model with two hidden layers.
+Requirement:
+The minimum value of the NN output, z, shall always be greater than or equal to -0.2, regardless of the input values.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ z(t) >= -0.2 }
+	)
+);
+
+
+
+Oracle
+ModelName: Neural_Model;
+ID: Neural_Req_3_x;
+Signals z1,z2,x1,x2;
+Constants T=0;
+Description: "
+Neural Network Model:
+A two-input single-output predictor neural network model with two hidden layers.
+Requirement:
+Using a first order finite backward difference equation, the spatial derivatives of
+Δz/ Δxt = (z(n,1)-z(n-1))/(xt(n,1)-xt(n-1,1) and Δz/ Δyt = (z(n,1)-z(n-1))/(yt(n,1)-yt(n-1,1) 
+shall never exceed a top bound of +10 or bottom bound of -35 (e.g. -35 <= Δz/ Δ(xt,yt) <= 10),
+where n denotes an index to the current values and n-1 denotes the prior values in the included truth data for xt and yt.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ ( z2(t) - z1(t) ) / ( x2(t) - x1(t)) >= -35 } and 
+		{ ( z2(t) - z1(t) ) / ( x2(t) - x1(t)) <= 10  } 		
+	)
+);
+
+
+Oracle
+ModelName: Neural_Model;
+ID: Neural_Req_3_y;
+Signals z1,z2,y1,y2;
+Constants T=0;
+Description: "
+Neural Network Model:
+A two-input single-output predictor neural network model with two hidden layers.
+Requirement:
+Using a first order finite backward difference equation, the spatial derivatives of
+Δz/ Δxt = (z(n,1)-z(n-1))/(xt(n,1)-xt(n-1,1) and Δz/ Δyt = (z(n,1)-z(n-1))/(yt(n,1)-yt(n-1,1) 
+shall never exceed a top bound of +10 or bottom bound of -35 (e.g. -35 <= Δz/ Δ(xt,yt) <= 10),
+where n denotes an index to the current values and n-1 denotes the prior values in the included truth data for xt and yt.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ ( z2(t) - z1(t) ) / ( y2(t) - y1(t) )  >= -35  } and
+		{ ( z2(t) - z1(t) ) / ( y2(t) - y1(t) )  <= 10  }
+	)
+);
+
+
+
+Oracle
+ModelName: Tustin_Model;
+Path: ./Tustin/;
+ID: Tustin_Req_1;
+Signals Reset, yout, tl ,bl ,Ic;
+Constants T=200000;
+Description: "
+Tustin model:
+A numeric model that computes integral over time.
+Requirement:
+When Reset is True and the Initial Condition (Ic) is bounded by the provided Top and Bottom Limits (bl <= ic <= tl),
+the Output (yout) shall equal the Initial Condition (Ic).";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		( { Reset(t) = 1 } and { Ic(t) <= tl(t) } and { Ic(t) >= bl(t) } implies { yout(t) = Ic(t) } ) and  
+		( { Reset(t) = 1 } and { Ic(t) <= tl(t) } and { tl(t) >= bl(t) } implies { yout(t) = tl(t) } ) and 
+		( { Reset(t) = 1 } and { Ic(t) <= bl(t) } and { tl(t) >= bl(t) } implies { yout(t) = bl(t) } ) and 
+		( { Reset(t) = 1 } and { Ic(t) <= bl(t) } and { tl(t) < bl(t) } implies { yout(t) = bl(t) } )
+	) 	 
+);
+
+
+Oracle
+ModelName: Tustin_Model;
+Path: ./Tustin/;
+ID: Tustin_Req_2;
+Signals yout,tl,bl;
+Constants T=200000;
+Description: "
+Tustin model:
+A numerIc model that computes integral over time.
+Requirement:
+The Output (yout) shall be bounded by the provided Top and Bottom Limits (tl and bl)";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		( { tl(t) >= bl(t) } implies ( { bl(t) <= yout(t) } and { yout(t) <= tl(t) } ) ) and 
+		( { tl(t) < bl(t) } implies ( { tl(t) <= yout(t) } and { yout(t) <= bl(t) } ) )
+	)
+);
+
+
+Oracle
+ModelName: Tustin_Model;
+Path: ./Tustin/;
+ID: Tustin_Req_3;
+Signals Reset,yout,tl,bl,xin;
+Constants T=200000;
+Description: "
+Tustin model:
+A numeric model that computes integral over time.
+Requirement:
+When in normal operation, the output shall be the result of the equation, yout = T/2*(xin + xinpv)+ ypv";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Reset(t) = 0 } and 
+			(
+				({ tl(t) >= yout(t) } and { yout(t) >= bl(t) })  or 
+				({ bl(t) >= yout(t) } and { yout(t)  >= tl(t) }) 
+			)
+		) implies
+		
+		{ yout(t) = ( 0.5 * ( T * ( xin(t) + xin(t-1) ) ) ) + yout(t-1) } 	
+	)
+);
+
+Oracle
+ModelName: Tustin_Model;
+Path: ./Tustin/;
+ID: Tustin_Req_4_a;
+Signals yout,tl,bl;
+Constants T=200000;
+Description: "
+Tustin model:
+A numeric model that computes integral over time.
+Requirement:
+Over a 10 second computational duration at an execution frequency of 10 hz, the Output should equal the sine of time t, sin(t),
+where time is defined as a vector from 0 to 10 by increments of 0.1 seconds within a +/- 0.1 tolerance for an input equal to the cosine of time t, cos(t),
+with the sample delta time T = 0.1 seconds when in normal mode of operation.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		
+		(
+			({ tl(t) >= bl(t) } and  ({ yout(t) >= bl(t) }  and { yout(t) <= tl(t) })) or
+		  	({ bl(t) >= tl(t) } and ({ yout(t) >= tl(t) }  and { yout(t) <= bl(t) }))  	
+		) implies
+ 		{ |yout(T) - 10 | <= 0.1 }
+
+	)
+);
+
+Oracle
+ModelName: Tustin_Model;
+Path: ./Tustin/;
+ID: Tustin_Req_4_b;
+Signals yout,tl,bl,sinsig;
+Constants T=200000;
+Description: "
+Tustin model:
+A numeric model that computes integral over time.
+Requirement:
+Over a 10 second computational duration at an execution frequency of 10 hz, the Output should equal the sine of time t, sin(t),
+where time is defined as a vector from 0 to 10 by increments of 0.1 seconds within a +/- 0.1 tolerance for an input equal to the cosine of time t, cos(t),
+with the sample delta time T = 0.1 seconds when in normal mode of operation.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		
+		(
+			({ tl(t) >= bl(t) } and  { yout(t) >= bl(t) }  and { yout(t) <= tl(t) }) or
+		  	({ bl(t) >= tl(t) } and { yout(t) >= tl(t) }  and { yout(t) <= bl(t) })  	
+		) implies
+ 		{ |yout(t) - sinsig(t) | <= 0.1 }
+
+	)
+); 
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_1;
+Signals Tank1Height, Tank1CrossSec;
+Constants T=200000, Tank1MaxHeight=7;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+Tank 1 shall not overflow.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank1Height(t) <=  ( Tank1MaxHeight * Tank1CrossSec(t) ) }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_2;
+Signals Tank2Height, Tank2CrossSec;
+Constants T=200000, Tank2MaxHeight=4;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+Tank 2 shall not overflow.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		 { Tank2Height(t) <=  ( Tank2MaxHeight * Tank2CrossSec(t) ) }
+	)
+); 
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_5;
+Signals Tank1Height, Tank1SensorHHeight, Tank1SensorHValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 1 liquid height is greater than or equal to the sensor height of the tank 1 HIGH liquid 
+sensor then the sensor should return an active (TRUE) state to the system.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank1Height(t) >= Tank1SensorHHeight(t) } implies { Tank1SensorHValue(t) = 1 } 
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_6;
+Signals Tank1Height, Tank1SensorHHeight, Tank1SensorHValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 1 liquid height is below (less than) the placement height of the tank 1 HIGH liquid sensor 
+then the sensor should return a (FALSE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank1Height(t) < Tank1SensorHHeight(t) } implies { Tank1SensorHValue(t) = 0 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_7;
+Signals Tank1Height, Tank1SensorLHeight, Tank1SensorLValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 1 liquid height is greater than or equal to the placement height of the tank 1 LOW liquid sensor
+then the sensor should return an active (TRUE) state to the system.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank1Height(t) >= Tank1SensorLHeight(t) } implies { Tank1SensorLValue(t) = 1 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_8;
+Signals Tank1Height, Tank1SensorLHeight, Tank1SensorLValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 1 liquid height is below (less than) the placement height of the tank 1 LOW liquid sensor then the sensor 
+should return a (FALSE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank1Height(t) < Tank1SensorLHeight(t) } implies { Tank1SensorLValue(t) = 0 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_9;
+Signals Tank2Height, Tank2SensorHHeight, Tank2SensorHValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 2 liquid height is greater than or equal to the placement height of the tank 2 HIGH liquid sensor then the sensor 
+should return an active (TRUE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2Height(t) >= Tank2SensorHHeight(t) } implies { Tank2SensorHValue(t) = 1 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_10;
+Signals Tank2Height, Tank2SensorHHeight, Tank2SensorHValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 2 liquid height is below (less than) the placement height of the tank 2 HIGH liquid sensor then the sensor should return a 
+(FALSE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2Height(t) < Tank2SensorHHeight(t) } implies { Tank2SensorHValue(t) = 0 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_11;
+Signals Tank2Height, Tank2SensorMHeight, Tank2SensorMValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 2 liquid height is greater than or equal to the placement height of the tank 2 MID liquid sensor then the sensor should return 
+an active (TRUE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2Height(t) >= Tank2SensorMHeight(t) } implies { Tank2SensorMValue(t) = 1 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_12;
+Signals Tank2Height, Tank2SensorMHeight, Tank2SensorMValue;
+Constants T=200000;
+Description: "
+If the tank 2 liquid height is below (less than) the placement height of the tank 2 MID liquid sensor then the sensor should return a 
+(FALSE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2Height(t) < Tank2SensorMHeight(t) } implies { Tank2SensorMValue(t) = 0 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_13;
+Signals Tank2Height, Tank2SensorLHeight, Tank2SensorLValue;
+Constants T=200000;
+Description: "
+If the tank 2 liquid height is greater than or equal to the placement height of the tank 2 LOW liquid sensor then the sensor 
+should return an active (TRUE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2Height(t) >= Tank2SensorLHeight(t) } implies { Tank2SensorLValue(t) = 1 }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_14;
+Signals Tank2Height, Tank2SensorLHeight, Tank2SensorLValue;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+If the tank 2 liquid height is below (less than) the placement height of the tank 2 LOW liquid sensor then the sensor should 
+return a (FALSE) state to the system. ";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2Height(t) < Tank2SensorLHeight(t) } implies { Tank2SensorLValue(t) = 0 }
+	)
+);
+
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_16;
+Signals Tank1Height, TimeIncrement, Tank1ValveFlow, Tank1PumpFlow, Tank1CrossSec;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+The tank 1 is initially empty or below the low tank 1 liquid height sensor. If the tank is not empty the liquid height must be known to the system.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		{ ( -TimeIncrement(t) * Tank1ValveFlow(t) ) <=  ( ( Tank1Height(t) - Tank1Height(t-1) ) * Tank1CrossSec(t) ) } 
+		and 
+		{ ( ( Tank1Height(t) - Tank1Height(t-1) ) * Tank1CrossSec(t) ) <=  ( TimeIncrement(t) * Tank1PumpFlow(t) ) }
+	)
+);
+
+
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_17;
+Signals Tank1Height, Tank1ValveFlow, Tank1PumpFlow, TimeIncrement, Tank1CrossSec, Pump_State, Valve_State;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+The tank 1 resulting liquid height for each timestep is dependent on the liquid height in the previous timestep plus the additional liquid height defined by 
+the net flow rate from the state of the pump and the valve and the cross-sectional area of tank 1.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Pump_State(t) = 1 } and { Valve_State(t) = 1 } ) implies { Tank1Height(t) = Tank1Height(t-1) + ( Tank1PumpFlow(t) - ( Tank1ValveFlow(t) * TimeIncrement(t) / Tank1CrossSec(t) ) ) } and
+		( { Pump_State(t) = 1 } and { Valve_State(t) = 0 } ) implies { Tank1Height(t) = Tank1Height(t-1) + (Tank1PumpFlow(t)  * TimeIncrement(t) / Tank1CrossSec(t) ) } and
+		( { Pump_State(t) = 0 } and { Valve_State(t) = 1 } ) implies { Tank1Height(t) = Tank1Height(t-1) - ( Tank1ValveFlow(t) * TimeIncrement(t) / Tank1CrossSec(t) ) } and
+        ( { Pump_State(t) = 0 } and { Valve_State(t) = 0 } )implies { Tank1Height(t) = Tank1Height(t-1) }	        			      
+    )	
+);
+
+
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_18;
+Signals Tank1Height, Pump_State, Valve_State;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 pump is ON and the valve is CLOSED the liquid height in the tank shall increase from the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Pump_State(t) = 1 } and { Valve_State(t) = 0 } ) implies { Tank1Height(t) > Tank1Height(t-1) } 
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_19;
+Signals Tank1Height, Pump_State, Valve_State;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 pump is OFF and the valve is OPEN the liquid height in the tank shall decrease from the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Pump_State(t) = 0 } and { Valve_State(t) = 1 } ) implies { Tank1Height(t) < Tank1Height(t-1) } 
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_20;
+Signals Tank1Height, Pump_State, Valve_State;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 pump is OFF and the valve is OPEN the liquid height in the tank shall decrease from the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Pump_State(t) = 0 } and { Valve_State(t) = 0 } ) implies { Tank1Height(t) = Tank1Height(t-1) } 
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_26;
+Signals Tank2Height, TimeIncrement, Tank1ValveFlow, Tank2PValveFlow, Tank2EValveFlow, Tank2CrossSec;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+The tank 2 change in liquid volume for each timestep is limited by the maximum inflow and outflow for each timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		{ ( ( -1 * ( Tank2PValveFlow(t) + Tank2EValveFlow(t) ) ) * TimeIncrement(t) ) <= ( Tank2CrossSec(t) * ( Tank2Height(t) - Tank2Height(t-1) ) ) } and 
+		{ ( Tank2CrossSec(t) * (Tank2Height(t) - Tank2Height(t-1) ) ) <=  ( TimeIncrement(t) * Tank1ValveFlow(t) ) }
+	)
+);
+
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_27;
+Signals Tank2Height, Tank1ValveFlow, Tank2PValveFlow, Tank2EValveFlow, TimeIncrement, Tank2CrossSec, Valve_State, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+The resulting tank 2 liquid height for each timestep is a function of the liquid height in the previous timestep, 
+the additional liquid height as defined by the net flow rate from the state of the inflow valve from tank 1 
+and tank 2 outflow valves (production and emergency), and the cross-sectional area";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( ( { Valve_State(t) = 1 } and { PValveState(t) = 1 } and { EValveState(t) = 1 } ) implies { Tank2Height(t) = Tank2Height(t-1) + ( ( ( (Tank1ValveFlow(t) - Tank2PValveFlow(t)) - Tank2EValveFlow(t)) * TimeIncrement(t) ) / Tank2CrossSec(t) ) } ) and
+		( ( { Valve_State(t) = 1 } and { PValveState(t) = 1 } and { EValveState(t) = 0 } ) implies { Tank2Height(t) = Tank2Height(t-1) + ( ( ( Tank1ValveFlow(t) - Tank2PValveFlow(t) ) * TimeIncrement(t) ) / Tank2CrossSec(t) ) } ) and
+		( ( { Valve_State(t) = 1 } and { PValveState(t) = 0 } and { EValveState(t) = 1 } ) implies { Tank2Height(t) = Tank2Height(t-1) + ( ( ( Tank1ValveFlow(t) - Tank2EValveFlow(t) ) * TimeIncrement(t) ) / Tank2CrossSec(t) ) } ) and
+		( ( { Valve_State(t) = 1 } and { PValveState(t) = 0 } and { EValveState(t) = 0 } ) implies { Tank2Height(t) = Tank2Height(t-1) + ( ( Tank1ValveFlow(t) * TimeIncrement(t) ) / Tank2CrossSec(t) ) } ) and
+		( ( { Valve_State(t) = 0 } and { PValveState(t) = 1 } and { EValveState(t) = 1 } ) implies { Tank2Height(t) = Tank2Height(t-1) + ( ( ( (-1 * Tank2PValveFlow(t)) - Tank2EValveFlow(t) ) * TimeIncrement(t) ) / Tank2CrossSec(t) ) } ) and
+		( ( { Valve_State(t) = 0 } and { PValveState(t) = 1 } and { EValveState(t) = 0 } ) implies { Tank2Height(t) = Tank2Height(t-1) + ( ( (-1 * Tank2PValveFlow(t)) * TimeIncrement(t) ) / Tank2CrossSec(t) ) } ) and
+		( ( { Valve_State(t) = 0 } and { PValveState(t) = 0 } and { EValveState(t) = 1 } ) implies { Tank2Height(t) = Tank2Height(t-1) + ( ( ( (-1 * Tank2EValveFlow(t)) ) * TimeIncrement(t) ) / Tank2CrossSec(t) ) } ) and
+		( ( { Valve_State(t) = 0 } and { PValveState(t) = 0 } and { EValveState(t) = 0 } ) implies { Tank2Height(t) = Tank2Height(t-1) } )
+	)		
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_28;
+Signals Tank2Height, Valve_State, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 valve is OPEN and the tank 2 outflow valves (emergency and production) are CLOSED the liquid height in tank 2 shall increase from the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Valve_State(t) = 1 } and { PValveState(t) = 0 } and { EValveState(t) = 0 } ) implies { Tank2Height(t) > Tank2Height(t-1) }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_29;
+Signals Tank2Height, Valve_State, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 valve is OPEN, the tank 2 production valve is OPEN, and the tank 2 emergency valve is CLOSED the liquid height in tank 2 shall increase from the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Valve_State(t) = 1 } and { PValveState(t) = 1 } and { EValveState(t) = 0 } ) implies { Tank2Height(t) > Tank2Height(t-1) }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_30;
+Signals Tank2Height, Valve_State, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 valve is OPEN, the tank 2 production valve is CLOSED, and the tank 2 emergency valve is OPEN the liquid height in tank 2 shall decrease from the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Valve_State(t) = 1 } and { PValveState(t) = 0 } and { EValveState(t) = 1 } ) implies { Tank2Height(t) < Tank2Height(t-1) }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_1_31;
+Signals Tank2Height, Valve_State, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 valve is CLOSED that the tank 2 valves (production and emergency) are CLOSED the liquid height in tank 2 shall remain the same from the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Valve_State(t) = 0 } and { PValveState(t) = 0 } and { EValveState(t) = 0 } ) implies { Tank2Height(t) = Tank2Height(t-1) }
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_1;
+Signals Tank1SensorLValue, Pump_State, Valve_State;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 LOW liquid sensor is FALSE, the tank 1 pump shall be ON and the tank 1 outflow valve shall be CLOSED.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank1SensorLValue(t) = 0 } implies ( { Pump_State(t) = 1 } and { Valve_State(t) = 0 }	)
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_2;
+Signals Tank1SensorHValue, Pump_State, Valve_State;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 HIGH liquid sensor is TRUE, the tank 1 pump shall be OFF and the tank 1 outflow valve shall be OPEN.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank1SensorHValue(t) = 1 } implies ( { Pump_State(t) = 0 } and { Valve_State(t) = 1 }	)
+	)
+);
+
+
+
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_3;
+Signals Tank1SensorHValue, Tank1SensorLValue, Pump_State, Valve_State;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 1 HIGH liquid sensor is FALSE and the tank 1 LOW liquid sensor is TRUE then the tank 1 pump and the tank 1 outflow valve shall maintain the states they were set to in the previous timestep.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Tank1SensorHValue(t) = 0 } and { Tank1SensorLValue(t) = 1 } ) implies  ( { Pump_State(t) = Pump_State(t-1) } and { Valve_State(t) = Valve_State(t-1) } )
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_7;
+Signals Tank2SensorLValue, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 2 LOW sensor is FALSE, the emergency valve and the production valve (outflow valves) shall be commanded to be CLOSED.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2SensorLValue(t) = 0 } implies  ( { PValveState(t) = 0 } and { EValveState(t) = 0 } )
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_8;
+Signals Tank2SensorLValue, Tank2SensorMValue, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 2 LOW sensor is TRUE and the tank 2 MID sensor is FALSE, then emergency valve shall be commanded to be CLOSED and the production valve shall be commanded to be OPEN.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		( { Tank2SensorLValue(t) = 1 } and { Tank2SensorMValue(t) = 0 } ) implies  ( { PValveState(t) = 1 } and { EValveState(t) = 0 } )
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_9;
+Signals Tank2SensorHValue, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 2 HIGH sensor is TRUE, the emergency valve and the production valve (outflow valves) shall be commanded to be OPEN.";
+Specification: 
+(
+	forall t in [ 0 , T ]:
+	(
+		{ Tank2SensorHValue(t) = 1 } implies  ( { PValveState(t) = 1 } and { EValveState(t) = 1 } )
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_10;
+Signals Tank2SensorHValue, Tank2SensorMValue, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 2 LOW sensor is TRUE and the tank 2 MID sensor is FALSE, then emergency valve shall be commanded to be CLOSED and the production valve shall be commanded to be OPEN.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Tank2SensorHValue(t) = 0 } and { Tank2SensorMValue(t) = 1 } and { EValveState(t-1) = 1 } ) implies  ( { PValveState(t) = 1 } and { EValveState(t) = 1 } )
+	)
+);
+
+Oracle
+ModelName: Twotanks_Model;
+Path: ./Twotanks/;
+ID: Twotanks_Req_2_11;
+Signals Tank2SensorHValue, Tank2SensorMValue, PValveState, EValveState;
+Constants T=200000;
+Description: "
+Two Tanks model:
+The two tanks system contains two separate tanks holding liquid and connected via a pipe. The flow of incoming liquid into the first tank
+is controlled using a pump. The flow of liquid from the first tank to the second is controlled using a valve, and the flow of outgoing
+liquid from the second tank is controlled using two different valves:
+Requirement:
+When the tank 2 LOW sensor is TRUE and the tank 2 MID sensor is FALSE, then emergency valve shall be commanded to be CLOSED and the production valve shall be commanded to be OPEN.";
+Specification: 
+(
+	forall t in [ 1 , T ]:
+	(
+		( { Tank2SensorHValue(t) = 0 } and { Tank2SensorMValue(t) = 1 } and { EValveState(t-1) = 0 } ) implies  ( { PValveState(t) = 1 } and { EValveState(t) = 0 } )
+	)
+);
+
+
+
+
+Oracle
+ModelName: Swim_Model;
+Path: ./Swim/;
+ID: Swim_Req_1;
+Signals CatSwitchPosition, CalAirspeedmin, AircraftGrossWeight;
+Constants T=2000;
+Description:"
+System Wide Integrity Monitor model:
+A numerical algorithm that computes warning to an operator when the airspeed is approaching a boundary where an evasive fly up maneuver cannot be achieved.
+Requirement:
+The SWIM Airspeed algorithm shall output the minimum AGCAS airspeed required to perform a 2g ";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		( { CatSwitchPosition(t) = 0 } implies { CalAirspeedmin(t) = 1.25921 * ( sqrt( AircraftGrossWeight(t) + 10 ) ) } ) and
+		( { CatSwitchPosition(t) = 1 } implies { CalAirspeedmin(t) = 1.33694 * ( sqrt( AircraftGrossWeight(t) + 10 ) ) } )
+	)
+); 
+
+
+Oracle
+ModelName: Swim_Model;
+Path: ./Swim/;
+ID: Swim_Req_2_1;
+Signals WarningAllowed, AgcasLowSpeedWarn, ImpactPressure, Qcmin_lbspft2;
+Constants T=2000;
+Description:"
+System Wide Integrity Monitor model:
+A numerical algorithm that computes warning to an operator when the airspeed is approaching a boundary where an evasive fly up maneuver cannot be achieved.
+Requirement:
+When a low speed warning is allowed, as computed by the SWIM Airspeed algorithm, a low speed warning shall be true when the vehicle air data impact pressure is less than the warning trigger for minimum impact pressure in which a safe AGCAS evasive maneuver can be accomplished ";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		{ WarningAllowed(t) = 1 } implies 
+			( { AgcasLowSpeedWarn(t) = 1 } implies { ImpactPressure(t) < Qcmin_lbspft2(t) } )
+	)
+);
+	
+Oracle
+ModelName: Swim_Model;
+Path: ./Swim/;
+ID: Swim_Req_2_2;
+Signals WarningAllowed, AgcasLowSpeedWarn, ImpactPressure, Qcmin_lbspft2;
+Constants T=2000;
+Description:"
+System Wide Integrity Monitor model:
+A numerical algorithm that computes warning to an operator when the airspeed is approaching a boundary where an evasive fly up maneuver cannot be achieved.
+Requirement:
+When a low speed warning is allowed, as computed by the SWIM Airspeed algorithm, a low speed warning shall be true when the vehicle air data impact pressure is less than the warning trigger for minimum impact pressure in which a safe AGCAS evasive maneuver can be accomplished ";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		{ WarningAllowed(t) = 1 } implies 
+			( { ImpactPressure(t) < Qcmin_lbspft2(t) } implies { AgcasLowSpeedWarn(t) = 1 } )
+	)
+);
+
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_1;
+Signals lcvdt_cmd_fcs_dps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Roll Regulator Shall not command angular roll accelerations greater than the capability of the system (50 deg/sec2) for durations exceeding 100 frames (1 second @ 100 hz).";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		exists t1 in [ t , t + 99 ]:
+		(
+			{ |lcvdt_cmd_fcs_dps2(t)| <= 50 }
+		)
+	)
+);
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_2;
+Signals mcvdt_cmd_fcs_dps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Pitch Regulator Shall not command angular roll accelerations greater than the capability of the system (50 deg/sec2) for durations exceeding 100 frames (1 second @ 100 hz).";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		exists t1 in [ t , t + 99 ]:
+		(
+			{ |mcvdt_cmd_fcs_dps2(t)| <= 50 }
+		)
+	)
+);
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_3;
+Signals ncvdt_cmd_fcs_dps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Yaw Regulator Shall not command angular roll accelerations greater than the capability of the system (50 deg/sec2) for durations exceeding 100 frames (1 second @ 100 hz).";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		exists t1 in [ t , t + 99 ]:
+		(
+			{ |ncvdt_cmd_fcs_dps2(t)| <= 50 }
+		)
+	)
+);
+
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_4;
+Signals xcvdt_cmd_fcs_fps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Airspeed Regulator Shall not command angular roll accelerations greater than the capability of the system (32 deg/sec2) for durations exceeding 100 frames (1 second @ 100 hz).";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		exists t1 in [ t , t + 99 ]:
+		(
+			{ |xcvdt_cmd_fcs_fps2(t)| <= 50 }
+		)
+	)
+);
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_5;
+Signals hcvdt_cmd_fcs_fps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Height Regulator Shall not command angular roll accelerations greater than the capability of the system (32 deg/sec2) for durations exceeding 100 frames (1 second @ 100 hz).";
+Specification:
+(
+	forall t in [ 0 , T ]:
+	(
+		exists t1 in [ t , t + 99 ]:
+		(
+			{ |hcvdt_cmd_fcs_fps2(t)| <= 50 }
+		)
+	)
+);
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_6;
+Signals lcvdt_cmd_fcs_dps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Roll Regulator Shall not command transient changes in angular roll acceleration greater than 50 deg/sec2/sec.";
+Specification:
+(
+	forall t in [ 1 , T ]:
+	(
+		{ lcvdt_cmd_fcs_dps2(t) - lcvdt_cmd_fcs_dps2(t-1) <= 0.5 }
+	)
+);
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_7;
+Signals mcvdt_cmd_fcs_dps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Pitch Regulator Shall not command transient changes in angular roll acceleration greater than 50 deg/sec2/sec.";
+Specification:
+(
+	forall t in [ 1 , T ]:
+	(
+		{ mcvdt_cmd_fcs_dps2(t) - mcvdt_cmd_fcs_dps2(t-1) <= 0.5 }
+	)
+);
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_8;
+Signals ncvdt_cmd_fcs_dps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Yaw Regulator Shall not command transient changes in angular roll acceleration greater than 50 deg/sec2/sec.";
+Specification:
+(
+	forall t in [ 1 , T ]:
+	(
+		{ ncvdt_cmd_fcs_dps2(t) - ncvdt_cmd_fcs_dps2(t-1) <= 0.5 }
+	)
+);
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_9;
+Signals xcvdt_cmd_fcs_fps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Airspeed Regulator Shall not command transient changes in angular roll acceleration greater than 32 deg/sec2/sec.";
+Specification:
+(
+	forall t in [ 1 , T ]:
+	(
+		{ xcvdt_cmd_fcs_fps2(t) - xcvdt_cmd_fcs_fps2(t-1) <= 0.32 }
+	)
+);
+
+
+Oracle
+ModelName: Regulators_Model;
+Path: ./Regulators/;
+ID: Regulators_Req_10;
+Signals hcvdt_cmd_fcs_fps2;
+Constants T=200000;
+Description:"
+Regulators model:
+A PID controller which consists of 5 classical controllers for establishing the desired dynamics of a vehicle for 
+the roll, pitch, yaw, axial, and height channels
+Requirement:
+The Inner Loop Height Regulator Shall not command transient changes in angular roll acceleration greater than 32 deg/sec2/sec.";
+Specification:
+(
+	forall t in [ 1 , T ]:
+	(
+		{ hcvdt_cmd_fcs_fps2(t) - hcvdt_cmd_fcs_fps2(t-1) <= 0.32 }
+	)
+);
+
