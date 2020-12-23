@@ -10,8 +10,6 @@ import com.uottawa.nlp.util.FormatterPrinter;
 import com.uottawa.nlp.util.SmartCsvReader;
 import com.uottawa.nlp.util.SmartCsvWriter;
 
-
-
 public class Starter {
 
 	public static void main(String[] args) {
