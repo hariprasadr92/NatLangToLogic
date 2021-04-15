@@ -19,3 +19,4 @@ git clone https://github.com/hariprasadr92/NatLangToLogic.git
 - Run the Starter.java file to start the application
 - Note: The cleaned datast is already a part of the repo in the resources folder. 
 - Voila! You can see the translated output in the console!
+- All the best !!
